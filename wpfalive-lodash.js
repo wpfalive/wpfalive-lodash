@@ -45,6 +45,63 @@ wpfalive.difference = function(array, ...vals) {
     })
 }
 
+// ~values.indexOf() 只对-1返回0 (表示false)
+// push()返回新数组的长度
+// 如果array中某个元素不在values中，那么放入数组x
+// 最后返回x
+// const difference = (array, values) => array.reduce((x, y) => (~values.indexOf(y) || x.push(y), x), [])
+
+
+wpfalive.differenceBy = function(array, ...vals) {
+    let predicate = wpfalive.iteratee(vals.pop())
+
+}
+
+wpfalive.iteratee = function(func=wpfalive.identity) {
+    if(typeof func === 'string') {
+        return wpfalive.property()
+    }
+}
+
+/**
+ * Creates a function that returns the value at path of a given object.
+ * Array|string
+ * @param  {[type]} path [description]
+ * @return {[type]}      [description]
+ */
+wpfalive.property = function(path) {
+    let pathAry = []
+    if(!Array.isArray(path)) {
+        pathAry = path.split('.')
+    } else {
+        pathAry = path.slice()
+    }
+    return function(obj) {
+        return pathAry.reduce((a, b) => {
+            return a = a[b]
+        }, obj)
+    }
+}
+
+/**
+ * Converts value to a property path array.
+ * _.toPath('a.b.c') => ['a', 'b', 'c']
+ * _.toPath('a[0].b.c') => ['a', '0', 'b', 'c']
+ */
+wpfalive.toPath = function(value) {
+    const regex = /[\[\]\.]/
+    const pathAry = value.split(regex)
+    return pathAry
+}
+
+wpfalive.identity = function(value) {
+    return value
+}
+
+
+
+
+
 
 
 
