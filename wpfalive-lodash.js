@@ -57,9 +57,37 @@ wpfalive.differenceBy = function(array, ...vals) {
 
 }
 
+/**
+ * [map description]
+ * @param  collection (Array|Object): The collection to iterate over.
+ * @return {[type]}            [description]
+ * 解构赋值
+ */
+wpfalive.map = function(collection, iteratee=wpfalive.identity) {
+    const result = []
+    if (typeof iteratee === 'string') {
+        for (const {user:u} of collection) {
+            result.push(u)
+        }
+        return result
+    }
+    if (Array.isArray(collection)) {
+        for (let item of collection) {
+            console.log(item)
+            result.push(iteratee(item))
+        }
+    } else if (typeof collection === 'object') {
+        for (const [key, value] of Object.entries(collection)) {
+            result.push(iteratee(value))
+        }
+    }
+
+    return result
+}
+
 wpfalive.iteratee = function(func=wpfalive.identity) {
-    if(typeof func === 'string') {
-        return wpfalive.property()
+    if (typeof func === 'string') {
+        return wpfalive.property(func)
     }
 }
 
@@ -69,30 +97,35 @@ wpfalive.iteratee = function(func=wpfalive.identity) {
  * @param  {[type]} path [description]
  * @return {[type]}      [description]
  */
-wpfalive.property = function(path) {
-    let pathAry = []
-    if(!Array.isArray(path)) {
-        pathAry = path.split('.')
-    } else {
-        pathAry = path.slice()
-    }
-    return function(obj) {
-        return pathAry.reduce((a, b) => {
-            return a = a[b]
-        }, obj)
-    }
-}
+wpfalive.property = path => (obj) => wpfalive.toPath(path).reduce((x, y) => x[y], obj)
+
+
+// wpfalive.property = function(path) {
+//     let pathAry = []
+//     if(!Array.isArray(path)) {
+//         pathAry = path.split('.')
+//     } else {
+//         pathAry = path.slice()
+//     }
+//     return function(obj) {
+//         return pathAry.reduce((a, b) => {
+//             return a = a[b]
+//         }, obj)
+//     }
+// }
+// 
+    
 
 /**
  * Converts value to a property path array.
  * _.toPath('a.b.c') => ['a', 'b', 'c']
  * _.toPath('a[0].b.c') => ['a', '0', 'b', 'c']
  */
-wpfalive.toPath = function(value) {
-    const regex = /[\[\]\.]/
-    const pathAry = value.split(regex)
-    return pathAry
-}
+wpfalive.toPath = value => Array.isArray(value) ? value : value.match(/[^\[\]\.]/g)
+
+// wpfalive.toPath = value => value.replace(/[\[\]\.]/g, '').split('')
+// wpfalive.toPath = value => value.match(/[^\[\]\.]/g)
+
 
 wpfalive.identity = function(value) {
     return value
