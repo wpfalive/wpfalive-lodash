@@ -1,5 +1,5 @@
 /**
- * https://lodash.com/docs/4.17.5
+ * https://lodash.com/docs/4.17.10
  */
 
 const wpfalive = {}
@@ -30,6 +30,12 @@ wpfalive.concat = function(array, ...vals) {
  * _.difference([2, 1], [2, 3]) => [1]
  * difference([2, 1, 3], [2, 3], [3, 4]) => [1]
  */
+
+// wpfalive.difference2 = function(array, ...vals) {
+//     return array.reduce((x, y) => (~vals.indexOf(y) || x.push(y), x), [])
+// }
+
+
 wpfalive.difference = function(array, ...vals) {
     const result = []
     // 合并vals中所有array
@@ -49,12 +55,40 @@ wpfalive.difference = function(array, ...vals) {
 // push()返回新数组的长度
 // 如果array中某个元素不在values中，那么放入数组x
 // 最后返回x
-// const difference = (array, values) => array.reduce((x, y) => (~values.indexOf(y) || x.push(y), x), [])
+ // wpfalive.difference2 = (array, values) => array.reduce((x, y) => (~values.indexOf(y) || x.push(y), x), [])
 
 
 wpfalive.differenceBy = function(array, ...vals) {
+    const result = []
     let predicate = wpfalive.iteratee(vals.pop())
+    let ary = array.map(predicate)
+    let removeAry = Array.from(new Set(wpfalive.flatten(vals))).map(predicate)
+    ary.forEach((item, index) => {
+        if (!removeAry.some(it => eq(it, item))) {
+            result.push(array[index])
+        }
+    })
+}
 
+wpfalive.differenceWith = function(array, ...vals) {
+    const func = vals.pop()
+    if (wpfalive.getType(func) !== 'function') {
+        return
+    }
+
+}
+
+wpfalive.isEqual(value, other) {
+    
+}
+
+/**
+ * Flattens array a single level deep.
+ * flatten([1, [2, [3, [4]], 5]]) => [1, 2, [3, [4]], 5]
+ */
+wpfalive.flatten = function(array) {
+    // return array.reduce((x, y) => (Array.isArray(y) ? x.push(...y) : x.push(y), x), [])
+    return array.reduce((a, b) => a.concat(b), [])
 }
 
 /**
@@ -85,9 +119,27 @@ wpfalive.map = function(collection, iteratee=wpfalive.identity) {
     return result
 }
 
+/**
+ * Performs a SameValueZero comparison between two values to determine if they are equivalent.
+ * @return {[type]}       [description]
+ * value === other对于+0 === -0返回 true
+ */
+wpfalive.eq = function(value, other) {
+    return (value === other) || Object.is(value, other)
+}
+
 wpfalive.iteratee = function(func=wpfalive.identity) {
-    if (typeof func === 'string') {
+    const type = wpfalive.getType(func)
+    if (type === 'string') {
         return wpfalive.property(func)
+    } else if (type === 'object') {
+
+    } else if (type === 'array') {
+
+    } else if (type === 'regexp') {
+
+    } else if (type === 'function') {
+
     }
 }
 
@@ -131,6 +183,9 @@ wpfalive.identity = function(value) {
     return value
 }
 
+wpfalive.getType = function(value) {
+    return Object.prototype.toString.call(value).slice(8, -1).toLowerCase()
+}
 
 
 
