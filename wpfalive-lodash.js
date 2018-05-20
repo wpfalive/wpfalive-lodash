@@ -78,9 +78,98 @@ wpfalive.differenceWith = function(array, ...vals) {
 
 }
 
-wpfalive.isEqual(value, other) {
-    
+/**
+ * todo: 判断带有环的对象的相等性 a.a = a, b.a = b
+ * _.isEqual(a, b) => true
+ * @param  {[type]}  value [description]
+ * @param  {[type]}  other [description]
+ * @return {Boolean}       [description]
+ */
+wpfalive.isEqual = function(value, other) {
+    if (value === other) {
+        return true
+    }
+
+    // NaN
+    if (value !== value && other !== other) {
+        return true
+    }
+
+    if (typeof a !== typeof b) {
+        return false
+    }
+
+    if (Array.isArray(value) && Array.isArray(other)) {
+        if (value.length !== other.length) {
+            return false
+        }
+
+        for(let i = 0; i < value.length; i++) {
+            if (!isEqual(value[i], other[i])) {
+                return false
+            }
+        }
+        return true
+    }
+
+    // 如果一个是数组而另外一个不是
+    // 但不能直接写Array.isArray(a) && !Array.isArray(b)
+    // 因为不知道a是数组还是b是数组
+    // 区分object和array可以用getType
+    // 或者下面的办法 亦或
+    if (Array.isArray(value) ^ Array.isArray(other)) {
+        return false
+    }
+
+    // [1,2,3]['length'] => 3
+    // isEqual([1, 2, 3], {0:1, 1:2, 2:3, length=3}) 会进入这个分支
+    if(value !== null && other !== null && typeof value === 'object' && typeof other === 'object') {
+        for(var key in value) {
+            if(!wpfalive.isEqual(value[key], other[key])) {
+                return false 
+            }
+        }
+
+        for(var key in other) {
+            if(!wpfalive.isEqual(value[key], other[key])) {
+                return false 
+            }
+        }
+
+        return true
+    }
+
+    return false
+
 }
+
+wpfalive.range = function(start=0, end, step=1) {
+    const result = []
+    if (end === undefined) {
+        if(start > 0) {
+            step = 1
+        } else {
+            step = -1
+        }
+        end = start
+        start = 0
+    }
+    const targetEnd = Math.abs(end)
+    if(start >= targetEnd) {
+        return result
+    }
+
+    if (step === 0) {
+        return new Array(targetEnd - start).fill(start)
+    }
+    
+    for (let i = start; Math.abs(i) < targetEnd; i += step) {
+        result.push(i)
+    }
+    return result
+}
+
+wpfalive.sum = ary => ary.reduce((a, b) => (a += b, a), 0)
 
 /**
  * Flattens array a single level deep.
@@ -187,6 +276,20 @@ wpfalive.getType = function(value) {
     return Object.prototype.toString.call(value).slice(8, -1).toLowerCase()
 }
 
+wpfalive.matches = function(source) {
+    return wpfalive.bind(wpfalive.isMatch, null, _, source)
+}
+
+wpfalive.isMatch = function(object, source) {
+    for(let key in source) {
+        if (!wpfalive.isEqual(source[key], object[key])) {
+            return false
+        }
+    }
+    return true
+}
+
+wpfalive.reverse = ary => ary.reverse()
 
 
 
