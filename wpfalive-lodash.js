@@ -321,10 +321,14 @@ wpfalive.property = function(path) {
         // 使用key in array 遍历下标
         // 使用key of array 遍历数组的每一项
         for(let key of pathAry) {
+            // 处理key==='012...'的情况
+            let convertKey = parseInt(key)
+            key = isNaN(convertKey) ? key : convertKey
             if (!obj[key]) {
                 return undefined
             } else {
                 result = obj[key]
+                obj = result
             }
         }
         return result
@@ -349,8 +353,10 @@ wpfalive.find = function(collection, predicate=wpfalive.identity, fromIndex=0) {
 
 wpfalive.reverse = ary => ary.reverse()
 
+// 这种连写两个小括号的调用方法是错的
 wpfalive.get = function(object, path, defaultValue) {
-    const result = wpfalive.property(path)(object)
+    const func = wpfalive.property(path)
+    const result = func(object)
     return result === undefined ? defaultValue : result
 }
 
