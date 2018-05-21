@@ -35,6 +35,16 @@ wpfalive.concat = function(array, ...vals) {
 //     return array.reduce((x, y) => (~vals.indexOf(y) || x.push(y), x), [])
 // }
 
+wpfalive.difference3 = function(array, ...vals) {
+    const result = []
+    const removeAry = Array.from(new Set(wpfalive.flatten(vals)))
+    array.forEach((item, index) => {
+        if (!removeAry.some(it => wpfalive.eq(it, item))) {
+            result.push(array[index])
+        }
+    })
+    return result
+}
 
 wpfalive.difference = function(array, ...vals) {
     const result = []
@@ -64,18 +74,51 @@ wpfalive.differenceBy = function(array, ...vals) {
     let ary = array.map(predicate)
     let removeAry = Array.from(new Set(wpfalive.flatten(vals))).map(predicate)
     ary.forEach((item, index) => {
-        if (!removeAry.some(it => eq(it, item))) {
+        if (!removeAry.some(it => wpfalive.eq(it, item))) {
             result.push(array[index])
         }
     })
 }
 
 wpfalive.differenceWith = function(array, ...vals) {
+    const result = []
     const func = vals.pop()
-    if (wpfalive.getType(func) !== 'function') {
-        return
-    }
+    debugger
+    const removeAry = Array.from(new Set(wpfalive.flatten(vals)))
+    array.forEach((item, index) => {
+        if(!removeAry.some(it => func(it, item))) {
+            result.push(array[index])
+        }
+    })
+    return result
+}
 
+/**
+ * splice的返回值是被删除的那一项
+ * @param  {[type]} array [description]
+ * @param  {Number} n     [description]
+ * @return {[type]}       [description]
+ */
+wpfalive.drop = (array, n=1) => (array.splice(0, n), array)
+
+/**
+ * Creates a slice of array with n elements dropped from the end
+ */
+wpfalive.dropRight = function(array, n=1) {
+    let start = array.length - n
+    if (start < 0) {
+        start = 0
+    }
+    array.splice(start)
+    return array
+}
+
+// 
+wpfalive.dropRightWhile = function(array, predicate=wpfalive.identity) {
+    while (array.length && predicate(array[array.length - 1])) {
+        array.pop()
+    }
+    return array
 }
 
 /**
@@ -217,56 +260,13 @@ wpfalive.eq = function(value, other) {
     return (value === other) || Object.is(value, other)
 }
 
-wpfalive.iteratee = function(func=wpfalive.identity) {
-    const type = wpfalive.getType(func)
-    if (type === 'string') {
-        return wpfalive.property(func)
-    } else if (type === 'object') {
-
-    } else if (type === 'array') {
-
-    } else if (type === 'regexp') {
-
-    } else if (type === 'function') {
-
-    }
-}
-
-/**
- * Creates a function that returns the value at path of a given object.
- * Array|string
- * @param  {[type]} path [description]
- * @return {[type]}      [description]
- */
-wpfalive.property = path => (obj) => wpfalive.toPath(path).reduce((x, y) => x[y], obj)
-
-
-// wpfalive.property = function(path) {
-//     let pathAry = []
-//     if(!Array.isArray(path)) {
-//         pathAry = path.split('.')
-//     } else {
-//         pathAry = path.slice()
-//     }
-//     return function(obj) {
-//         return pathAry.reduce((a, b) => {
-//             return a = a[b]
-//         }, obj)
-//     }
-// }
-// 
-    
-
 /**
  * Converts value to a property path array.
  * _.toPath('a.b.c') => ['a', 'b', 'c']
  * _.toPath('a[0].b.c') => ['a', '0', 'b', 'c']
+ * https://github.com/ramda/ramda/issues/1965
  */
-wpfalive.toPath = value => Array.isArray(value) ? value : value.match(/[^\[\]\.]/g)
-
-// wpfalive.toPath = value => value.replace(/[\[\]\.]/g, '').split('')
-// wpfalive.toPath = value => value.match(/[^\[\]\.]/g)
-
+wpfalive.toPath = value => Array.isArray(value) ? value : value.split(/[^\w\d]+/g)
 
 wpfalive.identity = function(value) {
     return value
@@ -289,7 +289,75 @@ wpfalive.isMatch = function(object, source) {
     return true
 }
 
+wpfalive.iteratee = function(func=wpfalive.identity) {
+    const type = wpfalive.getType(func)
+    if (type === 'string') {
+        return wpfalive.property(func)
+    } else if (type === 'object') {
+        return wpfalive.matches(func)
+    } else if (type === 'array') {
+        return wpfalive.matchesProperty(func) // func是path
+    } else if (type === 'regexp') {
+
+    } else if (type === 'function') {
+        return func
+    }
+}
+
+/**
+ * Creates a function that returns the value at path of a given object.
+ * Array|string
+ * @param  {[type]} path [description]
+ * @return {[type]}      [description]
+ */
+// wpfalive.property = path => (obj) => wpfalive.toPath(path).reduce((x, y) => x[y], obj)
+
+
+wpfalive.property = function(path) {
+    const pathAry = wpfalive.toPath(path)
+    return function(obj) {
+        let result
+        // 需要return来跳出循环，因此不能写reduce
+        // 使用key in array 遍历下标
+        // 使用key of array 遍历数组的每一项
+        for(let key of pathAry) {
+            if (!obj[key]) {
+                return undefined
+            } else {
+                result = obj[key]
+            }
+        }
+        return result
+    }
+}
+
+wpfalive.matchesProperty = function(path, srcValue) {
+    return function(obj) {
+        const getProperty = wpfalive.property(path)
+        return wpfalive.isEqual(getProperty(obj), srcValue)
+    }
+}
+
+wpfalive.find = function(collection, predicate=wpfalive.identity, fromIndex=0) {
+    const func = wpfalive.iteratee(predicate)
+    for(let i = fromIndex; i < collection.length; i++) {
+        if (func(collection[i])) {
+            return collection[i]
+        }
+    }
+}
+
 wpfalive.reverse = ary => ary.reverse()
+
+wpfalive.get = function(object, path, defaultValue) {
+    const result = wpfalive.property(path)(object)
+    return result === undefined ? defaultValue : result
+}
+
+// bind -> matches -> dropRightWhile
+wpfalive.bind = function() {
+
+}
 
 
 
