@@ -31,6 +31,7 @@ wpfalive.concat = function(array, ...vals) {
  * difference([2, 1, 3], [2, 3], [3, 4]) => [1]
  */
 
+// 这种写法，无法支持多个数组的情况
 // wpfalive.difference2 = function(array, ...vals) {
 //     return array.reduce((x, y) => (~vals.indexOf(y) || x.push(y), x), [])
 // }
@@ -104,18 +105,21 @@ wpfalive.drop = (array, n=1) => (array.splice(0, n), array)
 /**
  * Creates a slice of array with n elements dropped from the end
  */
-wpfalive.dropRight = function(array, n=1) {
-    let start = array.length - n
-    if (start < 0) {
-        start = 0
-    }
-    array.splice(start)
-    return array
-}
+wpfalive.dropRight = (array, n=1) => array.reduce((a, b, i) => (i < array.length - n && a.push(b), a), [])
 
-// 
+// wpfalive.dropRight = function(array, n=1) {
+//     let start = array.length - n
+//     if (start < 0) {
+//         start = 0
+//     }
+//     array.splice(start)
+//     return array
+// }
+
+// 对于path为['active', false]的情况暂时无解
 wpfalive.dropRightWhile = function(array, predicate=wpfalive.identity) {
-    while (array.length && predicate(array[array.length - 1])) {
+    const func = wpfalive.iteratee(predicate)
+    while (array.length && func(array[array.length - 1])) {
         array.pop()
     }
     return array
@@ -239,7 +243,6 @@ wpfalive.map = function(collection, iteratee=wpfalive.identity) {
     }
     if (Array.isArray(collection)) {
         for (let item of collection) {
-            console.log(item)
             result.push(iteratee(item))
         }
     } else if (typeof collection === 'object') {
@@ -313,27 +316,31 @@ wpfalive.iteratee = function(func=wpfalive.identity) {
 // wpfalive.property = path => (obj) => wpfalive.toPath(path).reduce((x, y) => x[y], obj)
 
 
-wpfalive.property = function(path) {
-    const pathAry = wpfalive.toPath(path)
-    return function(obj) {
-        let result
-        // 需要return来跳出循环，因此不能写reduce
-        // 使用key in array 遍历下标
-        // 使用key of array 遍历数组的每一项
-        for(let key of pathAry) {
-            // 处理key==='012...'的情况
-            let convertKey = parseInt(key)
-            key = isNaN(convertKey) ? key : convertKey
-            if (!obj[key]) {
-                return undefined
-            } else {
-                result = obj[key]
-                obj = result
-            }
+// 使用key in array 遍历下标
+// 使用key of array 遍历数组的每一项
+// 可以使用forEach或者reduce, 然后在外部捕获异常
+wpfalive.property = function (path) {
+    const type = wpfalive.getType(path)
+    if( type === 'number') {
+        path = String(path)
+    }
+    if (type !== 'array' && type !== 'string' && type !== 'number') {
+        return undefined
+    }
+    let pathAry = wpfalive.toPath(path)
+    return function (obj) {
+        try {
+            pathAry.reduce((a,b) => {
+                return a = a[b]
+            }, obj)
+        } catch(e) {
+            console.log('error occurs: ', e)
+            return undefined
         }
-        return result
     }
 }
+
+
 
 wpfalive.matchesProperty = function(path, srcValue) {
     return function(obj) {
