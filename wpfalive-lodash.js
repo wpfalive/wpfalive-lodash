@@ -125,6 +125,26 @@ wpfalive.dropRightWhile = function(array, predicate=wpfalive.identity) {
     return array
 }
 
+wpfalive.fill = function(array, value, start=0, end=array.length) {
+    const replaceAry = []
+    const length = end - start
+    for(let i = 0; i < length; i++) {
+        replaceAry.push(value)
+    }
+    array.splice(start, length, ...replaceAry)
+    return array
+}
+// wpfalive.fill = function(array, value, start=0, end=array.length) {
+//     const endIndex = array.length - 1
+
+//     return array.map((it, index) => {
+//         if (index >= start && index < endIndex) {
+//             return it = value
+//         } else {
+//             return it
+//         }
+//     })
+// }
 /**
  * todo: 判断带有环的对象的相等性 a.a = a, b.a = b
  * _.isEqual(a, b) => true
