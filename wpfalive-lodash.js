@@ -134,17 +134,7 @@ wpfalive.fill = function(array, value, start=0, end=array.length) {
     array.splice(start, length, ...replaceAry)
     return array
 }
-// wpfalive.fill = function(array, value, start=0, end=array.length) {
-//     const endIndex = array.length - 1
 
-//     return array.map((it, index) => {
-//         if (index >= start && index < endIndex) {
-//             return it = value
-//         } else {
-//             return it
-//         }
-//     })
-// }
 /**
  * todo: 判断带有环的对象的相等性 a.a = a, b.a = b
  * _.isEqual(a, b) => true
@@ -350,7 +340,7 @@ wpfalive.property = function (path) {
     let pathAry = wpfalive.toPath(path)
     return function (obj) {
         try {
-            pathAry.reduce((a,b) => {
+            return pathAry.reduce((a,b) => {
                 return a = a[b]
             }, obj)
         } catch(e) {
@@ -378,9 +368,19 @@ wpfalive.find = function(collection, predicate=wpfalive.identity, fromIndex=0) {
     }
 }
 
+wpfalive.findIndex = function(array, predicate=wpfalive.identity, fromIndex=0) {
+    const func = wpfalive.iteratee(predicate)
+    for(let i = fromIndex; i < array.length; i++) {
+        if (func(array[i])) {
+            return i
+        }
+    }
+    return -1
+}
+
 wpfalive.reverse = ary => ary.reverse()
 
-// 这种连写两个小括号的调用方法是错的
+// 连写两个小括号的调用方法是错的
 wpfalive.get = function(object, path, defaultValue) {
     const func = wpfalive.property(path)
     const result = func(object)
@@ -388,8 +388,35 @@ wpfalive.get = function(object, path, defaultValue) {
 }
 
 // bind -> matches -> dropRightWhile
-wpfalive.bind = function() {
+// the placeholder is '#''
+// Array.prototype.map returns a new array
+// test case
+// function greet(greeting, punctuation) {
+//  return greeting + ' ' + this.user + punctuation;
+// }
+// var object = { 'user': 'fred' }
+// var bound = wpfalive.bind(greet, object, '#', '!');
+// bound('hi')
+// => 'hi fred!'
 
+wpfalive.bind = function(func, thisArg, ...partials) {
+    if (typeof func != 'function') {
+        throw new TypeError('bind - what is trying to be bound is not callable')
+    }
+
+    // partials is already an array
+    return function() {
+        const funcArgs = Array.prototype.slice.call(arguments)
+        const result = partials.map(item => {
+            if (item === '#') {
+                return item = funcArgs.shift()
+            } else {
+                return item
+            }
+        })
+        const finalArgs = wpfalive.concat(result, funcArgs)
+        return func.apply(thisArg, finalArgs)
+    }
 }
 
 
