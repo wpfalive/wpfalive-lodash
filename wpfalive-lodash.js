@@ -116,7 +116,6 @@ wpfalive.dropRight = (array, n=1) => array.reduce((a, b, i) => (i < array.length
 //     return array
 // }
 
-// 对于path为['active', false]的情况暂时无解
 wpfalive.dropRightWhile = function(array, predicate=wpfalive.identity) {
     const func = wpfalive.iteratee(predicate)
     while (array.length && func(array[array.length - 1])) {
@@ -290,7 +289,7 @@ wpfalive.getType = function(value) {
 }
 
 wpfalive.matches = function(source) {
-    return wpfalive.bind(wpfalive.isMatch, null, _, source)
+    return wpfalive.bind(wpfalive.isMatch, null, '#', source)
 }
 
 wpfalive.isMatch = function(object, source) {
@@ -309,7 +308,8 @@ wpfalive.iteratee = function(func=wpfalive.identity) {
     } else if (type === 'object') {
         return wpfalive.matches(func)
     } else if (type === 'array') {
-        return wpfalive.matchesProperty(func) // func是path
+        // func是数组，数组第一个元素为属性，第二个元素为srcVal
+        return wpfalive.matchesProperty(func[0], func[1])
     } else if (type === 'regexp') {
 
     } else if (type === 'function') {
@@ -361,7 +361,7 @@ wpfalive.matchesProperty = function(path, srcValue) {
 
 wpfalive.find = function(collection, predicate=wpfalive.identity, fromIndex=0) {
     const func = wpfalive.iteratee(predicate)
-    for(let i = fromIndex; i < collection.length; i++) {
+    for (let i = fromIndex; i < collection.length; i++) {
         if (func(collection[i])) {
             return collection[i]
         }
@@ -370,12 +370,59 @@ wpfalive.find = function(collection, predicate=wpfalive.identity, fromIndex=0) {
 
 wpfalive.findIndex = function(array, predicate=wpfalive.identity, fromIndex=0) {
     const func = wpfalive.iteratee(predicate)
-    for(let i = fromIndex; i < array.length; i++) {
+    for (let i = fromIndex; i < array.length; i++) {
         if (func(array[i])) {
             return i
         }
     }
     return -1
+}
+
+wpfalive.findLastIndex = function(array, predicate=wpfalive.identity, fromIndex=array.length-1) {
+    const func = wpfalive.iteratee(predicate)
+    for (let i = fromIndex; i >= 0; i--) {
+        if(func(array[i])) {
+            return i
+        }
+    }
+    return -1
+}
+
+// concat是把数组的每一项都拿进来了
+wpfalive.flatten = array => array.reduce((a, b) => a.concat(b), [])
+
+// wpfalive.flatten = function(array) {
+//     return array.reduce((a, b) => (Array.isArray(b) ? a.push(...b) : a.push(b), a), [])
+// }
+
+
+wpfalive.flattenDeep = array => array.reduce((a, b) => a.concat(Array.isArray(b) ? wpfalive.flattenDeep(b) : b), [])
+
+// wpfalive.flattenDeep = function(array, result=[]) {
+//     for (let item of array) {
+//         if (Array.isArray(item)) {
+//             wpfalive.flattenDeep(item, result)
+//         } else {
+//             result.push(item)
+//         }
+//     }
+//     return result
+// }
+
+wpfalive.flattenDepth = function(array, depth=1, result=[]) {
+    if (depth <= 0) {
+        return result
+    }
+    depth -= 1
+
+    for (let item of array) {
+        if (Array.isArray(item)) {
+            wpfalive.flattenDeep(item, depth, result)
+        } else {
+            result.push(item)
+        }
+    }
+    return result
 }
 
 wpfalive.reverse = ary => ary.reverse()
