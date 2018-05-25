@@ -409,21 +409,61 @@ wpfalive.flattenDeep = array => array.reduce((a, b) => a.concat(Array.isArray(b)
 //     return result
 // }
 
-wpfalive.flattenDepth = function(array, depth=1, result=[]) {
-    if (depth <= 0) {
-        return result
-    }
-    depth -= 1
+// depth > 1 ???
+wpfalive.flattenDepth = (array, depth=1) => array.reduce((a, b) => a.concat(Array.isArray(b) && depth > 1 ? 
+    wpfalive.flattenDepth(b, --depth) : 
+    b), [])
+// _.flattenDepth([1, [2, [3, [4]], 5]], 1) => [1, 2, [3, [4]], 5]
+// _.flattenDepth([1, [2, [3, [4]], 5]], 2) => [1, 2, 3, [4], 5]
+// wpfalive.flattenDepth = function(array, depth=1, result=[]) {
+    
+//     // depth -= 1
 
-    for (let item of array) {
-        if (Array.isArray(item)) {
-            wpfalive.flattenDeep(item, depth, result)
-        } else {
-            result.push(item)
-        }
+//     for (let item of array) {
+//         if (Array.isArray(item) && depth > 0) {
+//             depth -= 1
+//             result.concat(wpfalive.flattenDepth(item, depth, result))
+//         } else {
+//             result.push(item)
+//         }
+//     }
+
+//     return result
+// }
+
+// array to object
+// _.fromPairs([['a', 1], ['b', 2]]) => { 'a': 1, 'b': 2 }
+wpfalive.fromPairs = pairs => pairs.reduce((a, b) => (a[b[0]] = b[1], a), {})
+
+// object to array
+wpfalive.toPairs = function(object) {
+    const result = []
+    const entries = Object.entries(object)
+    for (let entry of entries) {
+        result.push(entry)
     }
     return result
 }
+
+wpfalive.head = array => array.shift()
+
+wpfalive.indexOf = function(array, value, fromIndex=0) {
+    if (fromIndex < 0) {
+        fromIndex = array.length + fromIndex
+    }
+    for (let i = fromIndex; i < array.length; i++) {
+        if (wpfalive.isEqual(array[i], value)) {
+            return i
+        }
+    }
+    return -1
+}
+
+wpfalive.initial = array => array.slice(0, -1)
+// wpfalive.initial = function(array) {
+//     array.pop()
+//     return array
+// }
 
 wpfalive.reverse = ary => ary.reverse()
 
