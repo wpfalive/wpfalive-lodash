@@ -465,6 +465,75 @@ wpfalive.initial = array => array.slice(0, -1)
 //     return array
 // }
 
+// 如何简化成一行
+wpfalive.intersection = function(...arrays) {
+    let result = arrays[0]
+    for (let i = 1; i < arrays.length; i++) {
+        result = wpfalive.getCommon(result, arrays[i])
+    }
+    return result
+}
+
+// 获取两个数组中相同的数，返回新数组
+wpfalive.getCommon = function(a, b, iteratee=wpfalive.identity) {
+    const result = []
+    const func = wpfalive.iteratee(iteratee)
+    const tempB = b.map(func)
+    const tempA = a.map(func)
+    for (let i = 0; i < tempA.length; i++) {
+        if(tempB.indexOf(tempA[i]) !== -1) {
+            result.push(a[i])
+        }
+    }
+    return result
+}
+
+wpfalive.intersectionBy = function(...arrays) {
+    const iteratee = arrays.pop()
+    let result = arrays[0]
+    for (let i = 1; i < arrays.length; i++) {
+        result = wpfalive.getCommon(result, arrays[i], iteratee)
+    }
+    return result
+}
+
+wpfalive.intersectionWith = function(...arrays) {
+
+
+}
+
+wpfalive.join = function(array, separator=',') {
+    return array.reduce((a, b) => a += b + separator, '').slice(0, -1)
+}
+
+wpfalive.last = array => array[array.length - 1]
+
+wpfalive.lastIndexOf = function(array, value, fromIndex=array.length-1) {
+    if (fromIndex < 0) {
+        fromIndex = array.length + fromIndex
+    }
+    for (let i = fromIndex; i >= 0; i--) {
+        if (wpfalive.isEqual(array[i], value)) {
+            return i
+        }
+    }
+    return -1
+}
+
+wpfalive.nth = function(array, n=0) {
+    if (n > array.length) {
+        return 
+    }
+    if (n < 0) {
+        n = array.length + n
+    }
+    return array[n]
+}
+
+wpfalive.pull = function(array, ...values) {
+    //return array = array.reduce((a, b) => values.indexOf(b) === -1 ? : )
+}
+
 wpfalive.reverse = ary => ary.reverse()
 
 // 连写两个小括号的调用方法是错的
