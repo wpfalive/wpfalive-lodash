@@ -530,8 +530,48 @@ wpfalive.nth = function(array, n=0) {
     return array[n]
 }
 
+// wpfalive.pull = (array, ...values) => array.reduce((result, item, index) => (values.indexOf(item) === -1 ? result.push(item) : (1 === 1), result), array)
+
 wpfalive.pull = function(array, ...values) {
-    //return array = array.reduce((a, b) => values.indexOf(b) === -1 ? : )
+    const result = []
+    array.forEach((item, index) => {
+        if (values.indexOf(item) === -1) {
+            result.push(item)
+        }
+    })
+    array = result
+    return array
+}
+
+// values is an array
+wpfalive.pullAll = function(array, values) {
+    return wpfalive.pull(array, ...values)
+}
+
+wpfalive.pullAllWith = function(array, values, comparator) {
+    const result = []
+    for (let i = 0; i < array.length; i++) {
+        for (let j = 0; j < values.length; j++) {
+            if (!comparator(array[i], values[j])) {
+                result.push(array[i])
+            }
+        }
+    }
+    array = result
+    return array
+}
+
+wpfalive.pullAt = function(array, ...index) {
+    const indexAry = wpfalive.flattenDeep(index)
+    const pulled =  indexAry.reduce((a, b) => (a.push(array.splice(b, 1, '#')), a), [])
+    //array = array.filter(item => item !== '#')
+    for (let i = 0; i < array.length; i++) {
+        if (array[i] === '#') {
+            array.splice(i, 1)
+            i--
+        }
+    }
+    return pulled
 }
 
 wpfalive.reverse = ary => ary.reverse()
