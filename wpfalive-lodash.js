@@ -530,18 +530,18 @@ wpfalive.nth = function(array, n=0) {
     return array[n]
 }
 
-// wpfalive.pull = (array, ...values) => array.reduce((result, item, index) => (values.indexOf(item) === -1 ? result.push(item) : (1 === 1), result), array)
+wpfalive.pull = (array, ...values) => array.reduce((result, item, index) => (values.indexOf(item) === -1 ? result.push(item) : (1 === 1), result), [])
 
-wpfalive.pull = function(array, ...values) {
-    const result = []
-    array.forEach((item, index) => {
-        if (values.indexOf(item) === -1) {
-            result.push(item)
-        }
-    })
-    array = result
-    return array
-}
+// wpfalive.pull = function(array, ...values) {
+//     const result = []
+//     array.forEach((item, index) => {
+//         if (values.indexOf(item) === -1) {
+//             result.push(item)
+//         }
+//     })
+//     array = result
+//     return array
+// }
 
 // values is an array
 wpfalive.pullAll = function(array, values) {
@@ -561,10 +561,11 @@ wpfalive.pullAllWith = function(array, values, comparator) {
     return array
 }
 
+// splice一次之后，已经无法通过最初传进来的index判断要移除的元素了
 wpfalive.pullAt = function(array, ...index) {
     const indexAry = wpfalive.flattenDeep(index)
     const pulled =  indexAry.reduce((a, b) => (a.push(array.splice(b, 1, '#')), a), [])
-    //array = array.filter(item => item !== '#')
+    // array = array.filter(item => item !== '#') // 这种写法没法直接影响外部的array
     for (let i = 0; i < array.length; i++) {
         if (array[i] === '#') {
             array.splice(i, 1)
@@ -574,7 +575,37 @@ wpfalive.pullAt = function(array, ...index) {
     return pulled
 }
 
+wpfalive.remove = function(array, predicate=wpfalive.identity) {
+    const func = wpfalive.iteratee(predicate)
+    // 被移除元素的集合
+    return array.reduce((pulled, item, idx) => (func(item) ? pulled.push(array.splice(idx, 1)) : (1 === 1), pulled), [])
+}
+
 wpfalive.reverse = ary => ary.reverse()
+
+// This method is used instead of Array#slice to ensure dense arrays are returned.
+// Array#slice 效果如下
+// const ary = new Array(5)
+// ary[1] = 1
+// ary[2] = 2
+// ary[3] = 3
+// ary.slice(0) => [empty, 1, 2, 3, empty]
+// _.slice(ary, 0) => [undefined, 1, 2, 3, undefined]
+wpfalive.slice = function(array, start=0, end=array.length) {
+    const result = []
+    for (let i = start; i < end; i++) {
+        result.push(array[i])
+    }
+    return result
+}
+
+/**
+ * 二分查找 value合适放置的最小下标
+ * array (Array): The sorted array to inspect
+ */
+wpfalive.sortIndex = function(array, value) {
+
+}
 
 // 连写两个小括号的调用方法是错的
 wpfalive.get = function(object, path, defaultValue) {
