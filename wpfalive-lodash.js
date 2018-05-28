@@ -603,8 +603,128 @@ wpfalive.slice = function(array, start=0, end=array.length) {
  * 二分查找 value合适放置的最小下标
  * array (Array): The sorted array to inspect
  */
-wpfalive.sortIndex = function(array, value) {
+wpfalive.sortedIndex = function(array, value) {
+    const len = array.length
+    let start = 0
+    let end = len - 1
+    let mid = Math.floor((start + end) / 2)
+    
+    if (value <= array[0]) {
+        return 0
+    }
+    if (value > array[end]) {
+        return end + 1
+    }
+    
+    while(start < end) {
+        if (array[mid] > value) {
+            end = mid
+            mid = Math.floor((start + end) / 2)
+        } else if (array[mid] < value) {
+            start = mid
+            mid = Math.floor((start + end) / 2)
+        } else if (array[mid] === value) {
+            return mid
+        }
+        if (mid === start) {
+            return start + 1
+        }
+        // 因为总是取Math.floor, 所以这里mid不可能等于end
+        // if (mid === end) {
+        //     console.log('mid = end')
+        //     return end - 1
+        // } 
+    }
+}
 
+wpfalive.sortedIndexBy = function(array, value, iteratee=wpfalive.identity) {
+    const func = wpfalive.iteratee(iteratee)
+    return wpfalive.sortedIndex(array.map(func), func(value))
+}
+
+// wrong
+// 二分查找元素，如果没找到则返回 -1
+wpfalive.sortedIndexOf = function(array, value) {
+    const len = array.length
+    let start = 0
+    let end = len - 1
+    let mid = Math.floor((start + end) / 2)
+    
+    if (value < array[0] || value > array[end]) {
+        return -1
+    }
+    
+    while(start < end) {
+        if (array[mid] > value) {
+            end = mid
+            mid = Math.floor((start + end) / 2)
+        } else if (array[mid] < value) {
+            start = mid
+            mid = Math.floor((start + end) / 2)
+        } else if (array[mid] === value) {
+            return mid
+        }
+        if (mid === start) {
+            return -1
+        }
+    }
+}
+
+// wrong
+wpfalive.sortedLastIndex = function(array, value) {
+    const len = array.length
+    let start = 0
+    let end = len - 1
+    let mid = Math.ceil((start + end) / 2)
+    
+    if (value <= array[0]) {
+        return 0
+    }
+    if (value > array[end]) {
+        return end + 1
+    }
+    
+    while(start < end) {
+        if (array[mid] > value) {
+            end = mid
+            mid = Math.ceil((start + end) / 2)
+        } else if (array[mid] < value) {
+            start = mid
+            mid = Math.ceil((start + end) / 2)
+        } else if (array[mid] === value) {
+            return mid
+        }
+        // if (mid === start) {
+        //     return start + 1
+        // }
+        // 因为总是取Math.floor, 所以这里mid不可能等于end
+        if (mid === end) {
+            console.log('mid = end')
+            return end - 1
+        } 
+    }
+}
+
+wpfalive.uniq = function(array) {
+    return Array.from(new Set(array))
+}
+
+wpfalive.sortedUniq = function(array) {
+    return array.reduce((a, b) => a.indexOf(b) === -1 ? a.concat(b) : a, [])
+}
+
+// wrong
+wpfalive.uniqBy = function(array, iteratee=wpfalive.identity) {
+    const func = wpfalive.iteratee(iteratee)
+    return Array.from(new Set(array.map(func)))
+}
+
+// wrong
+wpfalive.sortedUniqBy = function(array, iteratee) {
+    if (!typeof iteratee === 'function') {
+        throw new TypeError('iteratee - what is trying to be bound is not callable')
+    }
+    return array.map(iteratee).reduce()
 }
 
 // 连写两个小括号的调用方法是错的
