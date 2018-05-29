@@ -727,6 +727,21 @@ wpfalive.sortedUniqBy = function(array, iteratee) {
     return array.map(iteratee).reduce()
 }
 
+// An empty object is returned for uncloneable values such as error objects, functions, DOM nodes, and WeakMaps
+wpfalive.clone = function(value) {
+    const type = wpfalive.getType(value)
+    if (type === 'error'
+        || type === 'weakmap'
+        || type === 'function'
+        ) {
+        return {}
+    }
+    else {
+        const copy = value
+        return copy
+    }
+}
+
 // 连写两个小括号的调用方法是错的
 wpfalive.get = function(object, path, defaultValue) {
     const func = wpfalive.property(path)
