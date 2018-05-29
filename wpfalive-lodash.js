@@ -742,6 +742,21 @@ wpfalive.clone = function(value) {
     }
 }
 
+wpfalive.cloneDeep = function(value) {
+    let type = wpfalive.getType(value)
+    if (type !== 'array' && type !== 'object') {
+        return value
+    } else if (type == 'array') {
+        return Object.keys(value).map(key => wpfalive.cloneDeep(value[key]))
+    } else {
+        let obj = Object.create(Object.getPrototypeOf(value))
+        Object.keys(value).forEach(key => {
+            obj[key] = wpfalive.cloneDeep(value[key])
+        })
+        return obj
+    }
+}
+
 // 连写两个小括号的调用方法是错的
 wpfalive.get = function(object, path, defaultValue) {
     const func = wpfalive.property(path)
