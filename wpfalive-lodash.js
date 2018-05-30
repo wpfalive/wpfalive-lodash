@@ -713,18 +713,35 @@ wpfalive.sortedUniq = function(array) {
     return array.reduce((a, b) => a.indexOf(b) === -1 ? a.concat(b) : a, [])
 }
 
-// wrong
 wpfalive.uniqBy = function(array, iteratee=wpfalive.identity) {
+    const result = []
     const func = wpfalive.iteratee(iteratee)
-    return Array.from(new Set(array.map(func)))
+    const newAry = array.map(func)
+    newAry.forEach((item, index) => {
+        if (!result.some(it => wpfalive.eq(it, item))) {
+            result.push(array[index])
+        }
+    })
+    return result
 }
 
-// wrong
 wpfalive.sortedUniqBy = function(array, iteratee) {
     if (!typeof iteratee === 'function') {
         throw new TypeError('iteratee - what is trying to be bound is not callable')
     }
-    return array.map(iteratee).reduce()
+
+    // 每次读到唯一的元素，就放到temp数组中
+    let temp = []
+    let result = []
+    let ary = array.map(iteratee)
+    ary.forEach((item, index) => {
+        if (!wpfalive.eq(item, wpfalive.last(ary))) {
+            temp.push(array[index])
+            result.push(array[index])
+        }
+    })
+    
+    return result
 }
 
 // An empty object is returned for uncloneable values such as error objects, functions, DOM nodes, and WeakMaps
