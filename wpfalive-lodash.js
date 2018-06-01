@@ -744,6 +744,35 @@ wpfalive.sortedUniqBy = function(array, iteratee) {
     return result
 }
 
+// Gets all but the first element of array.
+wpfalive.tail = array => array.slice(1)
+
+wpfalive.take = (array, n=1) => array.slice(0, n)
+
+wpfalive.takeRight = (array, n=1) => (n <=0 ? [] : array.slice(-n))
+
+wpfalive.takeRightWhile = (array, predicate=wpfalive.identity) => {
+    const func = wpfalive.iteratee(predicate)
+    const len = array.length
+    let n = 0
+    while (func(array[len-n-1])) {
+        n += 1
+    }
+    return wpfalive.takeRight(array, n)
+}
+
+wpfalive.takeWhile = (array, predicate=wpfalive.identity) => {
+    const func = wpfalive.iteratee(predicate)
+    let n = 0
+    while (func(array[n])) {
+        n += 1
+    }
+    return wpfalive.take(array, n)
+
+}
+
+wpfalive.union = (...arrays) => arrays.reduce((result, a) => Array.from(new Set(result.concat(a))),[])
+
 // An empty object is returned for uncloneable values such as error objects, functions, DOM nodes, and WeakMaps
 wpfalive.clone = function(value) {
     const type = wpfalive.getType(value)
