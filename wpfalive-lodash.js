@@ -791,6 +791,20 @@ wpfalive.unionBy = (...arrays) => {
     return result
 }
 
+// wrong
+wpfalive.unionWith = (...arrays) => {
+    const func = wpfalive.iteratee(arrays.pop())
+    const result = arrays[0]
+    arrays.forEach((item, idx) => {
+        item.forEach((it) => {
+            if (!func(item[idx], it)) {
+                result.push(it)
+            }
+        })
+    })
+    return result
+}
+
 // An empty object is returned for uncloneable values such as error objects, functions, DOM nodes, and WeakMaps
 wpfalive.clone = function(value) {
     const type = wpfalive.getType(value)
