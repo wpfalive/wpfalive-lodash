@@ -718,7 +718,7 @@ wpfalive.uniqBy = function(array, iteratee=wpfalive.identity) {
     const func = wpfalive.iteratee(iteratee)
     const newAry = array.map(func)
     newAry.forEach((item, index) => {
-        if (!result.some(it => wpfalive.eq(it, item))) {
+        if (!result.some(it => wpfalive.eq(func(it), item))) {
             result.push(array[index])
         }
     })
@@ -772,6 +772,24 @@ wpfalive.takeWhile = (array, predicate=wpfalive.identity) => {
 }
 
 wpfalive.union = (...arrays) => arrays.reduce((result, a) => Array.from(new Set(result.concat(a))),[])
+
+wpfalive.unionBy = (...arrays) => {
+    const result = []
+    const func = wpfalive.iteratee(arrays.pop())
+    const criterionAry = []
+    arrays.forEach(item => {
+        criterionAry.push(item.map(func))
+    })
+    
+    criterionAry.forEach((item, idxa) => {
+        item.forEach((it, idxb) => {
+            if (!result.some(a => wpfalive.eq(func(a), it))) {
+                result.push(arrays[idxa][idxb])
+            }
+        })
+    })
+    return result
+}
 
 // An empty object is returned for uncloneable values such as error objects, functions, DOM nodes, and WeakMaps
 wpfalive.clone = function(value) {
