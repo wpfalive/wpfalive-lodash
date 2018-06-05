@@ -725,6 +725,16 @@ wpfalive.uniqBy = function(array, iteratee=wpfalive.identity) {
     return result
 }
 
+wpfalive.uniqWith = function(array, comparator) {
+    const result = []
+    array.forEach(item => {
+        if (!result.some((it) => comparator(item, it))) {
+            result.push(item)
+        }
+    })
+    return result
+}
+
 wpfalive.sortedUniqBy = function(array, iteratee) {
     if (!typeof iteratee === 'function') {
         throw new TypeError('iteratee - what is trying to be bound is not callable')
@@ -802,6 +812,20 @@ wpfalive.unionWith = (...arrays) => {
         })
     })
     return result
+}
+
+// wrong
+wpfalive.zip = function(...arrays) {
+    const result = []
+    for (let i = 0; i < arrays.length; i++) {
+        // let ele = []
+
+    }
+    return result
+}
+
+wpfalive.unzip = function() {
+
 }
 
 // An empty object is returned for uncloneable values such as error objects, functions, DOM nodes, and WeakMaps
