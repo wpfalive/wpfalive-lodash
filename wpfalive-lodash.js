@@ -858,6 +858,23 @@ wpfalive.cloneDeep = function(value) {
     }
 }
 
+function clone(obj) {
+    if (typeof obj === 'object' && obj !== null) {
+        var o = String.prototype.toString.call(obj).slice(8, -1) === 'array' ? [] : {}
+        for (var k in obj) {
+            if (typeof obj[k] === 'object' && obj !== null) {
+                o[k] = clone(obj[k])
+            } else {
+                o[k] = obj[k]
+            }
+        }
+    } else {
+        return obj
+    }
+    
+    return o
+}
+
 // 连写两个小括号的调用方法是错的
 wpfalive.get = function(object, path, defaultValue) {
     const func = wpfalive.property(path)
