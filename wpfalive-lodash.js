@@ -842,18 +842,27 @@ wpfalive.zip = function(...arrays) {
  => [['a', 'b'], [1, 2], [true, false]]
  */
 
-wpfalive.unzip = function(arrays) {
-    const len = arrays.length
+wpfalive.unzip = function(array) {
+    const len = array.length
     // 每个元素都是一个数组，所有数组的长度相同，所以取第一个的长度就可以了
-    const eleLength = arrays[0].length
-    console.log(eleLength)
+    const eleLength = array[0].length
     const result = []
 
     for (let i = 0; i < eleLength; i++) {
         let ele = []
-        arrays.forEach((item) => ele.push(item[i]))
+        array.forEach((item) => ele.push(item[i]))
         result.push(ele)
     }
+
+    return result
+}
+
+wpfalive.unzipWith = function(array, iteratee=wpfalive.identity) {
+    const zipped = wpfalive.unzip(array)
+
+    const result = zipped.map(item => {
+        return item.reduce((a, b) => iteratee(a, b), 0)
+    })
 
     return result
 }
