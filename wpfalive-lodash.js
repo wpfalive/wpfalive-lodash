@@ -814,6 +814,7 @@ wpfalive.unionWith = (...arrays) => {
     return result
 }
 
+// arraysMaxLength([1,2,3], ['a', 'b', 'c', 'd'], [true, false]) => 4
 wpfalive.arraysMaxLength = (...arrays) => Math.max(...arrays.map(item => item.length))
 
 wpfalive.zip = function(...arrays) {
@@ -821,7 +822,6 @@ wpfalive.zip = function(...arrays) {
     const result = []
     // 算出arrays中的数组的最大长度
     const maxLength = wpfalive.arraysMaxLength(...arrays)
-    console.log(maxLength)
 
     for (let i = 0; i < len; i++) {
         let ele = []
@@ -834,8 +834,28 @@ wpfalive.zip = function(...arrays) {
     return result
 }
 
-wpfalive.unzip = function() {
+/**
+ * var zipped = _.zip(['a', 'b'], [1, 2], [true, false]);
+ => [['a', 1, true], ['b', 2, false]]
+ 
+ _.unzip(zipped);
+ => [['a', 'b'], [1, 2], [true, false]]
+ */
 
+wpfalive.unzip = function(arrays) {
+    const len = arrays.length
+    // 每个元素都是一个数组，所有数组的长度相同，所以取第一个的长度就可以了
+    const eleLength = arrays[0].length
+    console.log(eleLength)
+    const result = []
+
+    for (let i = 0; i < eleLength; i++) {
+        let ele = []
+        arrays.forEach((item) => ele.push(item[i]))
+        result.push(ele)
+    }
+
+    return result
 }
 
 // An empty object is returned for uncloneable values such as error objects, functions, DOM nodes, and WeakMaps
