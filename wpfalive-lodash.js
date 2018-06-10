@@ -814,13 +814,23 @@ wpfalive.unionWith = (...arrays) => {
     return result
 }
 
-// wrong
-wpfalive.zip = function(...arrays) {
-    const result = []
-    for (let i = 0; i < arrays.length; i++) {
-        // let ele = []
+wpfalive.arraysMaxLength = (...arrays) => Math.max(...arrays.map(item => item.length))
 
+wpfalive.zip = function(...arrays) {
+    const len = arrays.length
+    const result = []
+    // 算出arrays中的数组的最大长度
+    const maxLength = wpfalive.arraysMaxLength(...arrays)
+    console.log(maxLength)
+
+    for (let i = 0; i < len; i++) {
+        let ele = []
+        for (let j = 0; j < maxLength; j++) {
+            ele.push(arrays[j][i])
+        }
+        result.push(ele)
     }
+
     return result
 }
 
@@ -858,6 +868,7 @@ wpfalive.cloneDeep = function(value) {
     }
 }
 
+/*
 function clone(obj) {
     if (typeof obj === 'object' && obj !== null) {
         var o = String.prototype.toString.call(obj).slice(8, -1) === 'array' ? [] : {}
@@ -874,8 +885,8 @@ function clone(obj) {
     
     return o
 }
+*/
 
-// 连写两个小括号的调用方法是错的
 wpfalive.get = function(object, path, defaultValue) {
     const func = wpfalive.property(path)
     const result = func(object)
