@@ -867,6 +867,14 @@ wpfalive.unzipWith = function(array, iteratee=wpfalive.identity) {
     return result
 }
 
+wpfalive.without = function(array, ...values) {
+    return wpfalive.difference(array, values)
+}
+
+wpfalive.xor = function(...arrays) {
+    
+}
+
 // An empty object is returned for uncloneable values such as error objects, functions, DOM nodes, and WeakMaps
 wpfalive.clone = function(value) {
     const type = wpfalive.getType(value)
